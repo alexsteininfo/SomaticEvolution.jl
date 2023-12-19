@@ -106,6 +106,15 @@ function runsimulation(::Type{T}, ::Type{S}, input::SinglelevelInput, rng::Abstr
 
 end
 
+function runsimulation(::Type{T}, ::Type{S}, treemodule, input::SinglelevelInput, rng::AbstractRNG=Random.GLOBAL_RNG; 
+    timefunc=exptime, returnextinct=false) where {T <: AbstractTreeCell, S <: ModuleStructure}
+
+    simulate!(treemodule, input, rng; timefunc)
+    if length(treemodule) > 0 || returnextinct
+        return Simulation(input, treemodule)
+    end
+end
+
 function runsimulation_timeseries_returnfinalpop(::Type{T}, ::Type{S}, input, timesteps, func, rng::AbstractRNG=Random.GLOBAL_RNG) where {T, S}
     population = initialize_population(
         T,
