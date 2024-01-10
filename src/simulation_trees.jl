@@ -83,13 +83,24 @@ function branchingprocess!(treemodule::TreeModule, birthrate, deathrate, Nmax, �
     N = length(treemodule.cells)
     nextID = maximum(cellnode.data.id for cellnode in treemodule.cells)
 
-    while N < Nmax && N > 0
-        Δt = timefunc(rng, N * (birthrate + deathrate))
-        t + Δt <= tmax || break # end simulation if time exceeds maximum
-        t += Δt
-        _, N, nextID = 
-            branchingupdate!(treemodule, birthrate, deathrate, N, t, nextID, μ, mutationdist, rng)
+    if(birthrate>deathrate)
+        while N < Nmax && N > 0
+            Δt = timefunc(rng, N * (birthrate + deathrate))
+            t + Δt <= tmax || break # end simulation if time exceeds maximum
+            t += Δt
+            _, N, nextID = 
+                branchingupdate!(treemodule, birthrate, deathrate, N, t, nextID, μ, mutationdist, rng)
+        end
+    else # birthrate<deathrate
+        while N > Nmax && N > 0
+            Δt = timefunc(rng, N * (birthrate + deathrate))
+            t + Δt <= tmax || break # end simulation if time exceeds maximum
+            t += Δt
+            _, N, nextID = 
+                branchingupdate!(treemodule, birthrate, deathrate, N, t, nextID, μ, mutationdist, rng)
+        end
     end
+
     #add final mutations to all alive cells if mutations are time dependent
     if mutationdist == :fixedtimedep || mutationdist == :poissontimedep    
         add_mutations!(treemodule, t, mutationdist, μ, rng)
